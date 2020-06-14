@@ -1,6 +1,6 @@
 import  React, { Component } from  'react';
 import { BrowserRouter } from  'react-router-dom'
-import { Route, Link } from  'react-router-dom'
+import { Route } from  'react-router-dom'
 import CityList  from  './CityList'
 import City from './City'
 import  './App.css';
