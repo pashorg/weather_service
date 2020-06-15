@@ -13,18 +13,27 @@ class City extends Component {
         super(props);
         this.state  = {
             city: {},
-            weather_common: {},
-            weather_current: {},
+//            weather_common: {},
+//            weather_current: {},
+//            weather_hourly: [],
             time_stamp: '',
         };
     }
 
-    unixTimeToLocal(unixTime) {
+    unixTimeToUTC(unixTime) {
         var date = new Date(unixTime);
         var dateStr = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1) + '-' + date.getUTCDate();
         var timeStr = date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
         var dateTime = dateStr + ' ' + timeStr + ' UTC';
         return dateTime;
+    }
+    
+    arrayTimeToUTC(dataArray, ref, ref_new){
+        var self = this;
+        dataArray.forEach( function(hour, i, arr) {
+            hour[ref_new] = self.unixTimeToUTC(hour[ref]);
+        });
+        return dataArray;
     }
 
     componentDidMount() {
@@ -35,16 +44,20 @@ class City extends Component {
             self.setState({ city: result.data});
 
             weatherService.getWeather( result.data.latitude, result.data.longitude ).then(function (weather_result) {
-                console.log( weather_result );
+                let weather_hourly_tmp = self.arrayTimeToUTC(weather_result.hourly, 'dt', 'timeStr');
                 self.setState({ 
                     weather_common: weather_result,
-                    weather_current: weather_result.current
+                    weather_current: weather_result.current,
+                    weather_hourly: weather_hourly_tmp,
                 })
             });
         });
     }
     
     render() {
+        if (! this.state.weather_hourly){
+            return(<h1>Loading...</h1>);
+        }
         return (
         <div className="City--Single">
             <div className="row">
@@ -58,7 +71,7 @@ class City extends Component {
                                 Current Time
                             </td>
                             <td>
-                                { this.unixTimeToLocal( this.state.weather_current.dt * 1000 ) }
+                                { this.unixTimeToUTC( this.state.weather_current.dt * 1000 ) }
                             </td>
                         </tr>
                         <tr>
@@ -66,7 +79,7 @@ class City extends Component {
                                 Sunrise
                             </td>
                             <td >
-                                { this.unixTimeToLocal( this.state.weather_current.sunrise * 1000 ) }
+                                { this.unixTimeToUTC( this.state.weather_current.sunrise * 1000 ) }
                             </td>
                         </tr>
                         <tr>
@@ -74,7 +87,7 @@ class City extends Component {
                                  Sunset
                             </td>
                             <td >
-                                { this.unixTimeToLocal( this.state.weather_current.sunset * 1000 ) }
+                                { this.unixTimeToUTC( this.state.weather_current.sunset * 1000 ) }
                             </td>
                         </tr>
                         <tr>
@@ -97,7 +110,7 @@ class City extends Component {
                     </table>
                 </div>
                 <div id="HoursGraph" className="col-sm-12">
-                    <HoursGraph />
+                    <HoursGraph hoursData={ this.state.weather_hourly.reverse() } />
                 </div>
             </div>
         </div>
