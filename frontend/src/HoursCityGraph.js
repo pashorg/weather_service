@@ -1,29 +1,22 @@
-//const { Label, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceArea } = Recharts;
-
 import React, { Component } from  'react';
+import createReactClass from 'create-react-class';
+import { connect } from 'react-redux';
+import store from './reducers';
+
 import Recharts, { Label, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ReferenceArea } from 'recharts';
 
 
-class HoursGraph extends Component {
-    
-  constructor(props) {
-    super(props);
-    this.state = {
-        data: this.props.hoursData,
-        left : 'dataMin',
-        right : 'dataMax',
-        refAreaLeft : '',
-        refAreaRight : '',
-        top : 'dataMax+1',
-        bottom : 'dataMin-1',
-        top2 : 'dataMax+20',
-        bottom2 : 'dataMin-20',
-        animation : true
-    }
-  }
+const HoursGraph = createReactClass({
 
-  getAxisYDomain(from, to, ref, offset){
-	const refData = this.state.data.slice(from-1, to);
+  componentDidMount: function() {
+    store.dispatch({
+      type: 'SET_CHART',
+      chart: { data: this.props.weatherHourly }
+    });
+  },
+
+  getAxisYDomain: function(from, to, ref, offset){
+	  const refData = this.props.weatherHourly.slice(from-1, to);
     let [ bottom, top ] = [ refData[0][ref], refData[0][ref] ];
     refData.forEach( d => {
   	  if ( d[ref] > top ) top = d[ref];
@@ -31,53 +24,59 @@ class HoursGraph extends Component {
     });
   
     return [ (bottom|0) - offset, (top|0) + offset ]
-  };
+  },
   
-  zoom(){  
-    let { refAreaLeft, refAreaRight, data } = this.state;
+  zoom: function(){ 
+    var self = this;
+    let { refAreaLeft, refAreaRight, data } = this.props.chart;
 
     if ( refAreaLeft === refAreaRight || refAreaRight === '' ) {
-        this.setState( () => ({
-            reAreaLeft : '',
-            refAreaRight : ''
-        }) );
-        return;
+      store.dispatch({
+        type: 'SET_CHART',
+        chart: { reAreaLeft : '', refAreaRight : '' }
+      });
+      return;
     }
 
     // xAxis domain
     if ( refAreaLeft > refAreaRight ) [ refAreaLeft, refAreaRight ] = [ refAreaRight, refAreaLeft ];
 
     // yAxis domain
-    const [ bottom, top ] = this.getAxisYDomain( refAreaLeft, refAreaRight, 'temp', 0 );
-    const [ bottom2, top2 ] = this.getAxisYDomain( refAreaLeft, refAreaRight, 'feels_like', 0 );
-    
-    this.setState( () => ({
-      refAreaLeft : '',
-      refAreaRight : '',
-      data : data.slice(),
-      left : refAreaLeft,
-      right : refAreaRight,
-      bottom, top, bottom2, top2
-    } ) );
-  };
+    const [ bottom, top ] = self.getAxisYDomain( refAreaLeft, refAreaRight, 'temp', 0 );
+    const [ bottom2, top2 ] = self.getAxisYDomain( refAreaLeft, refAreaRight, 'feels_like', 0 );
 
-  zoomOut() {
-  	const { data } = this.state;
-  	this.setState( () => ({
-      data : data.slice(),
-      refAreaLeft : '',
-      refAreaRight : '',
-      left : 'dataMin',
-      right : 'dataMax',
-      top : 'dataMax+1',
-      bottom : 'dataMin',
-      top2 : 'dataMax+50',
-      bottom: 'dataMin+50'
-    }) );
-  }
+    store.dispatch({
+      type: 'SET_CHART',
+      chart: {
+        refAreaLeft : '',
+        refAreaRight : '',
+        data : this.props.weatherHourly.slice(),
+        left : refAreaLeft,
+        right : refAreaRight,
+        bottom, top, bottom2, top2
+      }
+    });
+  },
+
+  zoomOut: function() {
+    store.dispatch({
+      type: 'SET_CHART',
+      chart: {
+        data : this.props.weatherHourly.slice(),
+        refAreaLeft : '',
+        refAreaRight : '',
+        left : 'dataMin',
+        right : 'dataMax',
+        top : 'dataMax+1',
+        bottom : 'dataMin',
+        top2 : 'dataMax+50',
+        bottom: 'dataMin+50'
+      }
+    });
+  },
   
-  render() {
-    const { data, barIndex, left, right, refAreaLeft, refAreaRight, top, bottom, top2, bottom2 } = this.state;
+  render: function() {
+    const { data, barIndex, left, right, refAreaLeft, refAreaRight, top, bottom, top2, bottom2 } = this.props.chart;
 
     return (
       <div className="highlight-bar-charts">
@@ -94,8 +93,8 @@ class HoursGraph extends Component {
             width={800}
             height={400}
             data={data}
-            onMouseDown = { (e) => this.setState({refAreaLeft:e.activeLabel}) }
-            onMouseMove = { (e) => this.state.refAreaLeft && this.setState({refAreaRight:e.activeLabel}) }
+            onMouseDown = { (e) => store.dispatch({ type: 'SET_CHART', chart: { refAreaLeft:e.activeLabel } }) }
+            onMouseMove = { (e) => this.props.chart.refAreaLeft && store.dispatch({ type: 'SET_CHART', chart: { refAreaRight:e.activeLabel } }) }
             onMouseUp = { this.zoom.bind( this ) }
           >
             <CartesianGrid strokeDasharray="3 3"/>
@@ -119,17 +118,25 @@ class HoursGraph extends Component {
               yAxisId="2"
              /> 
             <Tooltip/>
-            <Line yAxisId="1" type='natural' dataKey='temp' stroke='#8884d8' animationDuration={300}/>
-            <Line yAxisId="2" type='natural' dataKey='feels_like' stroke='#82ca9d' animationDuration={300}/>
+            <Line name='# Temperature, K' yAxisId="1" type='natural' dataKey='temp' stroke='#8884d8' animationDuration={300}/>
+            <Line name='# Feels like, K' yAxisId="2" type='natural' dataKey='feels_like' stroke='#82ca9d' animationDuration={300}/>
             
             {
-            	(refAreaLeft && refAreaRight) ? (
-              <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight}  strokeOpacity={0.3} /> ) : null
-            
+              (refAreaLeft && refAreaRight) ? (
+                <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight}  strokeOpacity={0.3} /> 
+              ) : null
             }            
           </LineChart> 
       </div>
     );
   }
+});
+
+const mapStateToProps = function(store) {
+  return {
+      chart: store.cityState.chart,
+      weatherHourly: store.weatherState.weatherHourly,
+  };
 }
-export default HoursGraph;
+
+export default connect(mapStateToProps)(HoursGraph);

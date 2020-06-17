@@ -1,42 +1,40 @@
-import React, { Component } from  'react';
-
+import React from  'react';
+import createReactClass from 'create-react-class';
+import { connect } from 'react-redux';
+import store from './reducers';
 import WeatherService  from  './WeatherService';
+
 
 const weatherService  =  new  WeatherService();
 
-
-class  CityList  extends  Component {
-
-    constructor(props) {
-        super(props);
-        this.state  = {
-            cities: []
-        };
-    }
-
-    componentDidMount() {
-        var  self  =  this;
-        weatherService.getCities().then(function (result) {
+const CityList = createReactClass({
+    componentDidMount: function() {
+        weatherService.getCities().then(result => {
             console.log(result);
-            self.setState({ cities:  result.data})
+            store.dispatch({
+                type: 'GET_CITY_LIST',
+                cities: result.data
+            });
         });
-    }
+    },
     
-    render() {
+    render: function() {
         return (
-        <div  className="Cities--list">
-            <table  className="table">
-                <thead  key="thead">
+        <div className="Cities--list col-sm-12">
+            <table className="table">
+                <thead key="thead">
                 <tr>
                     <th>#</th>
                     <th>Name</th>
                     <th>Lat</th>
                     <th>Lon</th>
                     <th>Country</th>
+                    <th />
                 </tr>
                 </thead>
                 <tbody>
-                    {this.state.cities.map( c  =>
+                    {console.log(this.props.cities)}
+                    {this.props.cities.map( c  =>
                     <tr key={c.id}>
                         <td>{c.id}  </td>
                         <td>{c.name}</td>
@@ -53,5 +51,12 @@ class  CityList  extends  Component {
         );
     }
 
+});
+
+const mapStateToProps = function(store) {
+    return {
+        cities: store.cityState.cities
+    };
 }
-export default CityList;
+
+export default connect(mapStateToProps)(CityList);
