@@ -19,10 +19,9 @@ from weather import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login/', views.api_login, name='api_login'),
-    path('api/weather/<latitude>/<longitude>/', views.get_weather, name='get_weather'),
-    path('api/history/', views.get_history_default, name='get_history'),
-    path('api/history/<num>/', views.get_history, name='get_history'),
+    path('api/login/', views.Login.as_view(), name='api_login'),
+    path('api/weather/<latitude>/<longitude>/', views.WeatherView.as_view(), name='get_weather'),
+    path('api/history/<num>/', views.HistoryView.as_view(), name='history'),
     path('api/city/', views.CityCommonView.as_view(), name='cities'),
     re_path('api/city/(?P<city_id>\d+)/', views.CityView.as_view(), name='city'),
 ]

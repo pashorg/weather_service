@@ -1,10 +1,10 @@
 import axios from 'axios';
-const API_URL = 'http://192.168.88.242:8000';
+axios.defaults.withCredentials = true;
+const ip = window.location.hostname;
+const API_URL = `http://${ip}:8000`;
+
 
 export default class WeatherService{
-
-    constructor(){}
-
     getCities() {
         const url = `${API_URL}/api/city/`;
         return axios.get(url).then(response => response.data);
@@ -24,6 +24,14 @@ export default class WeatherService{
     getWeather(lat, lon){
         const url = `${API_URL}/api/weather/${lat}/${lon}/`;
         return axios.get(url).then(response => response.data);
+    }
+    getLogin(){
+        const url = `${API_URL}/api/login/`;
+        return axios.get(url).then(response => response.data);
+    }
+    Login(username, password){
+        const url = `${API_URL}/api/login/`;
+        return axios.post(url, { username: username, password:password } ).then(response => response.data);
     }
 
 }

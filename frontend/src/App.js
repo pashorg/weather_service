@@ -1,39 +1,22 @@
-import  React, { Component } from  'react';
+import  React from  'react';
 import { BrowserRouter } from  'react-router-dom'
-import { Route } from  'react-router-dom'
 import { Provider } from 'react-redux';
 import store from './reducers';
-import CityList  from  './CityList'
-import City from './City'
+import createReactClass from 'create-react-class';
+import BaseLayout from './BaseLayout'
 import  './App.css';
 
-const BaseLayout = () => (
-<div className="container-fluid">
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <a className="navbar-brand"  href="/">All Cities</a>
-    </nav>
-    <div className="content">
-        <div className="container">
-            <div className="row">
-                <Route path="/" exact component={CityList}  />
-                <Route path="/:id" exact component={City}  />
-            </div>
-        </div>
-    </div>
-</div>
-)
 
-class  App  extends  Component {
-
-    render() {
+const  App = createReactClass({
+    render: function() {
         return (
-        <Provider store={store}>
-            <BrowserRouter>
-                <BaseLayout/>
-            </BrowserRouter>
-        </Provider>
+            <Provider store={store}>
+                <BrowserRouter>
+                    <BaseLayout />
+                </BrowserRouter>
+            </Provider>
         );
     }
+});
 
-}
-export  default  App;
+export default App;

@@ -9,10 +9,8 @@ from weather.views.utils import lat_lon_validator
 import json
 
 
-#@method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class CityCommonView(View):
-
     def get(self, request):
         objects = City.objects.all()
         data = []
@@ -30,29 +28,10 @@ class CityCommonView(View):
             'num': len(data),
             'data': data
         }
-        request.session.flush()
         return JsonResponse(response_data)
 
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-        except json.decoder.JSONDecodeError:
-            response_data = {
-                'status': 400,
-                'error': "Can't serialize data"
-            }
-            response = JsonResponse(response_data)
-            response.status_code = 400
-#            request.session.flush()
-            return response
-#        valid, response = lat_lon_validator(latitude, longitude)
-#        if not valid:
-#            return response
-        return JsonResponse({})
 
-#@method_decorator(login_required, name='dispatch')
 class CityView(View):
-
     def get(self, request, city_id):
         city = get_object_or_404(City, id = city_id)
         data = {
@@ -68,5 +47,4 @@ class CityView(View):
             'num': len(data),
             'data': data
         }
-#        request.session.flush()
         return JsonResponse(response_data)

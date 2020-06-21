@@ -38,3 +38,19 @@
     transform: rotate(360deg);
   }
 }
+
+.custom-tooltip {
+  background-color: #fff;
+  border: 1px solid grey;
+  padding: 5px;
+}
+
+.tooltip-label{
+  padding: 5px;
+  margin: 0;
+}
+
+.tooltip-data{
+  padding: 2px;
+  margin: 0;
+}

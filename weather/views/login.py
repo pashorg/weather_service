@@ -1,60 +1,54 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
-import base64
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views.generic import View
+import base64, json
 
 
-def api_login(request):
-    user = None
-
-    if "HTTP_AUTHORIZATION" in request.META:
-        auth = request.META["HTTP_AUTHORIZATION"].split()
-        if len(auth) == 2 and auth[0].lower() == "basic":
-            auth_str = base64.b64decode(auth[1]).decode('utf-8')
-            username, password = auth_str.split(":")
-            user = authenticate(username=username, password=password)
-    
-    if user is None:
-        data = {
+@method_decorator(csrf_exempt, name='dispatch')
+class Login(View):
+    def get(self, request):
+        print (request.user.is_authenticated)
+        print (request.user)
+        if request.user.is_authenticated:
+            data = {
+                'status': 200,
+                'error': 'OK'
+            }
+        else:
+            data = {
                 'status': 401,
                 'error': 'Unauthorized'
-                }
+            }
         response = JsonResponse(data)
-        response.status_code = 401
         return response
 
-    next_page = request.GET.get('next', None)
-    if next_page is None:
-        data = {
-                'status': 400,
-                'error': 'Direct access to this URL is not allowed'
-                }
-        response = JsonResponse(data)
-        response.status_code = 400;
-        return response
-    login(request, user)
-    return redirect(next_page)
+    def post(self, request):
+        print (request.user.is_authenticated)
+        print (request.user)
+        data = json.loads(request.body.decode('utf-8'))
+        username = data.get('username', None)
+        password = data.get('password', None)
+        user = None
 
+        if username is not None and password is not None:
+            user = authenticate(username=username, password=password)
 
-# Log in using Django services
-def web_login(request):
-    if request.POST.get('submit', False):
-        username = request.POST['username']
-        password = request.POST['password']
-        next = request.POST['next']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            auth_login(request, user)
-            if next:
-                return redirect(next)
-            else:
-                return redirect('/')
-        else:
-            return render(request, 'facer/login.html',
-                          {
-                              'username': username,
-                              'next': next,
-                              'error': 'Неверное имя пользователя или пароль!'
-                          })
-    else:
-        return render(request, 'facer/login.html', {'next': request.GET.get('next', '/')})
+        logout(request)
+
+        if user is None:
+            data = {
+                    'status': 401,
+                    'error': 'Unauthorized'
+                    }
+            response = JsonResponse(data)
+#            response.status_code = 401
+            return response
+
+        login(request, user)
+        print (request.user.is_authenticated)
+        print (request.user)
+        data = { 'status': 200 }
+        return JsonResponse(data)

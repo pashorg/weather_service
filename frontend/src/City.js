@@ -1,8 +1,7 @@
-import React, { Component } from  'react';
+import React from  'react';
 import createReactClass from 'create-react-class';
 import { connect } from 'react-redux';
 import store from './reducers';
-
 import HoursGraph from './HoursCityGraph'
 import WeatherService  from  './WeatherService';
 
@@ -11,10 +10,17 @@ const weatherService  =  new  WeatherService();
 
 const City = createReactClass({
 
+    addZero: function(i) {
+        if (i < 10) {
+            i = "0" + i;
+        }
+        return i;
+    },
+
     unixTimeToUTC: function(unixTime) {
-        var date = new Date(unixTime);
+        var date = new Date(unixTime * 1000);
         var dateStr = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1) + '-' + date.getUTCDate();
-        var timeStr = date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
+        var timeStr = this.addZero(date.getUTCHours()) + ":" + this.addZero(date.getUTCMinutes());
         var dateTime = 'UTC ' + dateStr + ' ' + timeStr;
         return dateTime;
     },
@@ -54,17 +60,18 @@ const City = createReactClass({
             return(<h1>Loading...</h1>);
         }
         return (
-        <div className="City--Single col-sm-12">
+        <div className="City--Single col-sm-12 col-12">
             <h1>{this.props.city.country} - {this.props.city.name}</h1>
-            <h2>Current Weather</h2>
-            <table className="col-sm-6">
+            <h4>{this.props.city.latitude}; {this.props.city.longitude}</h4>
+            <h4>Current Weather</h4>
+            <table>
             <tbody>
                 <tr>
                     <td>
                         Current Time
                     </td>
                     <td>
-                        { this.unixTimeToUTC( this.props.weatherCurrent.dt * 1000 ) }
+                        { this.unixTimeToUTC( this.props.weatherCurrent.dt ) }
                     </td>
                 </tr>
                 <tr>
@@ -72,7 +79,7 @@ const City = createReactClass({
                         Sunrise
                     </td>
                     <td >
-                        { this.unixTimeToUTC( this.props.weatherCurrent.sunrise * 1000 ) }
+                        { this.unixTimeToUTC( this.props.weatherCurrent.sunrise ) }
                     </td>
                 </tr>
                 <tr>
@@ -80,7 +87,7 @@ const City = createReactClass({
                             Sunset
                     </td>
                     <td >
-                        { this.unixTimeToUTC( this.props.weatherCurrent.sunset * 1000 ) }
+                        { this.unixTimeToUTC( this.props.weatherCurrent.sunset ) }
                     </td>
                 </tr>
                 <tr>

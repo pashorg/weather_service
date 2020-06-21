@@ -10,7 +10,6 @@ const weatherService  =  new  WeatherService();
 const CityList = createReactClass({
     componentDidMount: function() {
         weatherService.getCities().then(result => {
-            console.log(result);
             store.dispatch({
                 type: 'GET_CITY_LIST',
                 cities: result.data
@@ -20,33 +19,21 @@ const CityList = createReactClass({
     
     render: function() {
         return (
-        <div className="Cities--list col-sm-12">
-            <table className="table">
-                <thead key="thead">
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Lat</th>
-                    <th>Lon</th>
-                    <th>Country</th>
-                    <th />
-                </tr>
-                </thead>
-                <tbody>
-                    {console.log(this.props.cities)}
-                    {this.props.cities.map( c  =>
-                    <tr key={c.id}>
-                        <td>{c.id}  </td>
-                        <td>{c.name}</td>
-                        <td>{c.latitude}</td>
-                        <td>{c.longitude}</td>
-                        <td>{c.country}</td>
-                        <td>
-                            <a href={c.id}>Show weather</a>
-                        </td>
-                    </tr>)}
-                </tbody>
-            </table>
+        <div className="Cities--list col-12">
+            <div className="row">
+                <div className="col-1 col-md-1">#</div>
+                <div className="col-5 col-md-3">Country</div>
+                <div className="col-5 col-md-8">City</div>
+            </div>
+            {this.props.cities.map( c  =>
+            <div className="row" key={c.id}>
+                <div className="col-1 col-md-1">{c.id}</div>
+                <div className="col-5 col-md-3">{c.country}</div>
+                <div className="col-5 col-md-8">
+                    <a href={"/city/" + c.id}>{c.name}</a>
+                </div>
+            </div>
+            )}
         </div>
         );
     }
