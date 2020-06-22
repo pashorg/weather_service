@@ -21,7 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', views.Login.as_view(), name='api_login'),
     path('api/weather/<latitude>/<longitude>/', views.WeatherView.as_view(), name='get_weather'),
-    path('api/history/<num>/', views.HistoryView.as_view(), name='history'),
+    path('api/history/<num>/', views.HistoryCommonView.as_view(), name='history'),
+    path('api/history/<num>/<lat>/<lon>', views.HistoryCityView.as_view(), name='history'),
     path('api/city/', views.CityCommonView.as_view(), name='cities'),
     re_path('api/city/(?P<city_id>\d+)/', views.CityView.as_view(), name='city'),
 ]

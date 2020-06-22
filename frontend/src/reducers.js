@@ -50,6 +50,12 @@ const weatherReducer = function(state = {}, action) {
                     weatherHourly: action.weatherHourly 
                 }
             );
+        case 'SET_HISTORY':
+            return Object.assign({}, state, 
+                { 
+                    weatherHistory: action.weatherHistory,
+                }
+            );
         default:
             //do nothing
     }
@@ -104,6 +110,54 @@ const chartReducer = function(state = initialChartState, action) {
     return state;
 }
 
+const historyChartReducer = function(state = initialChartState, action) {
+    switch(action.type) {
+        case 'SET_HISTORY_CHART':
+            return Object.assign({}, state, 
+                { 
+                    data: action.data,
+                    left : action.left,
+                    right : action.right,
+                    refAreaLeft : action.refAreaLeft,
+                    refAreaRight : action.refAreaRight,
+                    top : action.top,
+                    bottom : action.bottom,
+                    top2 : action.top2,
+                    bottom2: action.bottom2,
+                    animation : action.true
+                }
+            );
+        case 'SET_HISTORY_CHART_DATA':
+            return Object.assign({}, state, 
+                { 
+                    data: action.data,
+                }
+            );
+        case 'SET_HISTORY_CHART_REFS':
+            return Object.assign({}, state, 
+                { 
+                    refAreaLeft: action.refAreaLeft,
+                    refAreaRight: action.refAreaRight,
+                }
+            );
+        case 'SET_HISTORY_CHART_REF_LEFT':
+            return Object.assign({}, state, 
+                { 
+                    refAreaLeft: action.refAreaLeft,
+                }
+            );
+        case 'SET_HISTORY_CHART_REF_RIGHT':
+            return Object.assign({}, state, 
+                { 
+                    refAreaRight: action.refAreaRight,
+                }
+            );
+        default:
+            //do nothing
+    }
+    return state;
+}
+
 const credReducer = function(state = { username:'', password:'', submitted:false, loggedIn:false }, action) {
     switch(action.type) {
         case 'SET_USERNAME':
@@ -140,6 +194,7 @@ const reducers = combineReducers({
     cityState: cityReducer,
     weatherState: weatherReducer,
     chartState: chartReducer,
+    historyChartState: historyChartReducer,
     authState: authReducer,
     credState: credReducer
 });

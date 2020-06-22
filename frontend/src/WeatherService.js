@@ -17,8 +17,12 @@ export default class WeatherService{
         const url = `${API_URL}/api/history/`;
         return axios.get(url).then(response => response.data);
     }
-    getHistoryN(n) {
+    getCommonHistoryN(n) {
         const url = `${API_URL}/api/history/${n}/`;
+        return axios.get(url).then(response => response.data);
+    }
+    getCityHistoryN(n, lat, lon) {
+        const url = `${API_URL}/api/history/${n}/${lat}/${lon}`;
         return axios.get(url).then(response => response.data);
     }
     getWeather(lat, lon){

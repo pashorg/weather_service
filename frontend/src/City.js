@@ -3,6 +3,7 @@ import createReactClass from 'create-react-class';
 import { connect } from 'react-redux';
 import store from './reducers';
 import HoursGraph from './HoursCityGraph'
+import HistoryGraph from './HistoryCityGraph'
 import WeatherService  from  './WeatherService';
 
 const weatherService  =  new  WeatherService();
@@ -24,39 +25,49 @@ const City = createReactClass({
         var dateTime = 'UTC ' + dateStr + ' ' + timeStr;
         return dateTime;
     },
-    
-    arrayTimeToUTC: function(dataArray, ref, ref_new) {
-        var self = this;
-        dataArray.forEach( function(hour, i, arr) {
-            hour[ref_new] = self.unixTimeToUTC(hour[ref]);
+
+    sortByKey: function (array, key) {
+        return array.sort(function(a, b) {
+            var x = a[key]; var y = b[key];
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
         });
-        return dataArray;
     },
 
     componentDidMount: function() {
         var self = this;
         const { match: { params } } =  this.props;
         weatherService.getCity(params.id).then(function (result) {
-            console.log(result);
             store.dispatch({
                 type: 'GET_CITY',
                 city: result.data
             });
 
             weatherService.getWeather( result.data.latitude, result.data.longitude ).then(function (weatherResult) {
-                let weatherHourlyTmp = self.arrayTimeToUTC(weatherResult.hourly, 'dt', 'timeStr');
                 store.dispatch({
                     type: 'GET_WEATHER',
                     weatherCommon: weatherResult,
                     weatherCurrent: weatherResult.current,
-                    weatherHourly: weatherHourlyTmp
+                    weatherHourly: weatherResult.hourly
+                });
+            });
+
+            weatherService.getCityHistoryN( 100, result.data.latitude, result.data.longitude ).then(function (weatherHistoryResult) {
+                let data = [];
+                weatherHistoryResult.data.forEach(element => {
+                    let elem_object = JSON.parse(element.result.replace(/\'/g, '"'));
+                    data.push(elem_object.current);
+                });
+                
+                store.dispatch({
+                    type: 'SET_HISTORY',
+                    weatherHistory: self.sortByKey(data, 'dt'),
                 });
             });
         });
     },
     
     render: function() {
-        if (! this.props.weatherHourly){
+        if (! this.props.weatherHourly || !this.props.weatherHistory){
             return(<h1>Loading...</h1>);
         }
         return (
@@ -109,7 +120,12 @@ const City = createReactClass({
             </tbody>
             </table>
             <div id="HoursGraph">
-                <HoursGraph hoursData={ this.props.weatherHourly.reverse() } />
+                <h5>Data from openweathermap for the last 24 hours</h5>
+                <HoursGraph />
+            </div>
+            <div id="HistoryGraph">
+                <h5>Data from history - last 100</h5>
+                <HistoryGraph />
             </div>
         </div>
         );
@@ -122,6 +138,7 @@ const mapStateToProps = function(store) {
         weatherCommon: store.weatherState.weatherCommon,
         weatherCurrent: store.weatherState.weatherCurrent,
         weatherHourly: store.weatherState.weatherHourly,
+        weatherHistory: store.weatherState.weatherHistory
     };
 }
 
