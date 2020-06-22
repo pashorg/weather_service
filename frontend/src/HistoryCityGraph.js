@@ -97,8 +97,10 @@ const HistoryGraph = createReactClass({
 
     unixTimeToUTC: function(unixTime) {
         var date = new Date(unixTime * 1000);
+        var dateStr = date.getUTCFullYear() + '-' + (date.getUTCMonth() + 1) + '-' + date.getUTCDate();
         var timeStr = this.addZero(date.getUTCHours()) + ":" + this.addZero(date.getUTCMinutes());
-        return timeStr;
+        var dateTime = 'UTC ' + dateStr + ' ' + timeStr;
+        return dateTime;
     },
 
     unixTimeToUTCwithDate: function(unixTime) {
